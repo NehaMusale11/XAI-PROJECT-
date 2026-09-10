@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XAI Project - Faculty Explanation Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #1e1b4b;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #4338ca;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        hr {
+            border: 0;
+            border-top: 2px solid #6366f1;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #1e293b;
+            font-size: 16px;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 4px;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+        th {
+            background-color: #e0e7ff;
+            color: #1e1b4b;
+        }
+        .box {
+            background-color: #f8fafc;
+            border-left: 4px solid #6366f1;
+            padding: 12px 16px;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+        .q-box {
+            background-color: #f1f5f9;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .q-title {
+            font-weight: bold;
+            color: #4338ca;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>POST-HOC EXPLANATION OF BLACK-BOX MODELS</h1>
+    <div class="subtitle">Explainable AI (XAI) Project Report & Faculty Presentation Guide</div>
+    <hr>
+
+    <h2>1. Executive Summary & Core Objective</h2>
+    <p>Modern Machine Learning models (like XGBoost and Deep Neural Networks) yield exceptional accuracy but function as <strong>Black-Box Models</strong> because their inner mathematical logic is opaque to human interpretation. This project implements a comprehensive <strong>Post-hoc Explainable AI (XAI) Suite</strong> and <strong>Interactive Web Dashboard</strong> to interpret black-box predictions without altering underlying model structures.</p>
+
+    <h2>2. Trained Classification Models Performance</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Model Architecture</th>
+                <th>Model Type</th>
+                <th>Accuracy</th>
+                <th>F1-Score</th>
+                <th>ROC-AUC</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>XGBoost Classifier</strong></td>
+                <td>Black-Box (Ensemble)</td>
+                <td>88.33%</td>
+                <td>0.9067</td>
+                <td>0.9674</td>
+            </tr>
+            <tr>
+                <td><strong>Multi-Layer Perceptron</strong></td>
+                <td>Black-Box (Neural Net)</td>
+                <td>90.00%</td>
+                <td>0.9221</td>
+                <td>0.9641</td>
+            </tr>
+            <tr>
+                <td><strong>Random Forest</strong></td>
+                <td>Black-Box (Ensemble)</td>
+                <td>84.17%</td>
+                <td>0.8758</td>
+                <td>0.9384</td>
+            </tr>
+            <tr>
+                <td><strong>Logistic Regression</strong></td>
+                <td>White-Box (Baseline)</td>
+                <td>87.50%</td>
+                <td>0.9032</td>
+                <td>0.9419</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Implemented Post-hoc Interpretability Techniques</h2>
+    <div class="box">
+        <p><strong>A. SHAP (SHapley Additive exPlanations):</strong> Game-theoretic coalitional attribution calculating exact Shapley values. Satisfies Additivity Theorem: Base Value + sum(SHAP) = Prediction.</p>
+        <p><strong>B. LIME (Local Interpretable Model-agnostic Explanations):</strong> Generates local sparse linear surrogate models around perturbed instance neighborhoods. Evaluated using local R² fidelity scores (R² = 0.60 - 0.91).</p>
+        <p><strong>C. Partial Dependence Plots (PDP) & ICE:</strong> Visualizes marginal response curves illustrating feature interaction trends on predicted disease probabilities.</p>
+        <p><strong>D. Counterfactual Explanations:</strong> Optimization-based minimal actionable feature modifications required to flip high-risk predictions to low-risk.</p>
+    </div>
+
+    <h2>4. Simple Hinglish Explanation Guide for Faculty Presentation</h2>
+
+    <div class="q-box">
+        <div class="q-title">Q1. Project ka main purpose kya hai?</div>
+        <div><em>Answer:</em> Sir/Ma'am, jab hum complex ML models (jaise XGBoost ya Neural Networks) use karte hain, toh wo 'Black-Box' hote hain — yaani wo high accuracy toh dete hain par bata nahi sakte ki decision KYUN liya. Our project applies <strong>Post-hoc XAI techniques</strong> to explain black-box decisions after prediction without modifying the trained model.</div>
+    </div>
+
+    <div class="q-box">
+        <div class="q-title">Q2. Konsi 4 main post-hoc techniques implement ki hain?</div>
+        <div><em>Answer:</em><br>
+        1. <strong>SHAP:</strong> Game theory based attributions jo exact feature impact point dikhati hai.<br>
+        2. <strong>LIME:</strong> Prediction ke aaspas local linear model fit karke local feature weights + R² fidelity score batata hai.<br>
+        3. <strong>PDP / ICE:</strong> Single feature change hone par overall risk curve dikhaata hai.<br>
+        4. <strong>Counterfactuals:</strong> Actionable recommendations deta hai (e.g., 'If ST depression drops from 2.8 to 0.8mm, disease risk drops to 22%').</div>
+    </div>
+
+    <div class="q-box">
+        <div class="q-title">Q3. Implementation & GitHub details?</div>
+        <div><em>Answer:</em> Humne Flask REST API + HTML5/CSS3 glassmorphism UI + Plotly.js se live dashboard banaya hai. Entire project is pushed to GitHub: <strong>https://github.com/NehaMusale11/XAI-PROJECT-</strong></div>
+    </div>
+
+</body>
+</html>
