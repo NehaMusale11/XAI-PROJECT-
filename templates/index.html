@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-hoc Explanation of Black-Box Models | Explainable AI Suite</title>
+    <meta name="description" content="Interactive Explainable AI (XAI) dashboard for Post-hoc Explanation of Black-Box Models using SHAP, LIME, PDP, and Counterfactual analysis.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="dark-theme">
+    <div class="app-layout">
+        <!-- Top Navigation Header -->
+        <header class="top-nav">
+            <div class="brand">
+                <div class="logo-icon"><i class="fa-solid fa-brain-circuit"></i></div>
+                <div class="brand-text">
+                    <h1>XAI Interpretability Suite</h1>
+                    <span class="subtitle">Post-hoc Explanation of Black-Box Models</span>
+                </div>
+            </div>
+            
+            <div class="nav-controls">
+                <div class="control-group">
+                    <label for="model-select"><i class="fa-solid fa-cube"></i> Black-Box Model:</label>
+                    <select id="model-select" class="custom-select">
+                        <option value="xgboost" selected>XGBoost Classifier (Gradient Boosted)</option>
+                        <option value="random_forest">Random Forest Classifier (Ensemble)</option>
+                        <option value="neural_net">Multi-Layer Perceptron (Deep Neural Net)</option>
+                        <option value="logistic_regression">Logistic Regression (White-Box Base)</option>
+                    </select>
+                </div>
+                
+                <button id="run-benchmark-btn" class="btn btn-secondary">
+                    <i class="fa-solid fa-bolt-lightning"></i> Fidelity Benchmark
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Sidebar: Feature Workbench & Presets -->
+            <aside class="sidebar-workbench">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-sliders"></i> Feature Inputs</h3>
+                        <span class="badge info">Interactive</span>
+                    </div>
+
+                    <!-- Preset Profile Selector -->
+                    <div class="preset-section">
+                        <label class="section-label">Quick Patient Profiles:</label>
+                        <div class="preset-buttons">
+                            <button class="btn btn-preset" data-preset="high_risk">
+                                <i class="fa-solid fa-triangle-exclamation text-danger"></i> High Risk
+                            </button>
+                            <button class="btn btn-preset" data-preset="medium_risk">
+                                <i class="fa-solid fa-circle-exclamation text-warning"></i> Moderate Risk
+                            </button>
+                            <button class="btn btn-preset" data-preset="low_risk">
+                                <i class="fa-solid fa-shield-heart text-success"></i> Low Risk
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr class="divider">
+
+                    <!-- Dynamic Input Sliders -->
+                    <div id="feature-sliders-container" class="sliders-scroll-area">
+                        <!-- Loaded dynamically via JS -->
+                    </div>
+
+                    <div class="workbench-actions">
+                        <button id="predict-explain-btn" class="btn btn-primary btn-block">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Predict & Explain
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center/Right Dashboard Tabs & Charts -->
+            <section class="dashboard-area">
+                <!-- Status Banner & Model Prediction Bar -->
+                <div class="prediction-banner glass-card">
+                    <div class="pred-item">
+                        <span class="pred-label">Black-Box Prediction</span>
+                        <div id="pred-class-badge" class="badge-lg danger">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Calculating...
+                        </div>
+                    </div>
+
+                    <div class="pred-item prob-meter-item">
+                        <span class="pred-label">Heart Disease Probability</span>
+                        <div class="prob-bar-wrapper">
+                            <div class="prob-progress-bg">
+                                <div id="prob-progress-fill" class="prob-progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <span id="prob-value-text" class="prob-value">0.00%</span>
+                        </div>
+                    </div>
+
+                    <div class="pred-item whitebox-compare">
+                        <span class="pred-label">White-Box Baseline (Logistic Reg)</span>
+                        <div class="wb-val">
+                            <span id="wb-prob-text">--%</span>
+                            <span id="wb-diff-tag" class="sub-tag">Diff: 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="content-tabs">
+                    <button class="tab-btn active" data-tab="tab-local">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> Local Explanations (SHAP vs LIME)
+                    </button>
+                    <button class="tab-btn" data-tab="tab-counterfactual">
+                        <i class="fa-solid fa-code-compare"></i> Counterfactual "What-If" Explorer
+                    </button>
+                    <button class="tab-btn" data-tab="tab-global">
+                        <i class="fa-solid fa-chart-pie"></i> Global Interpretability & PDP
+                    </button>
+                    <button class="tab-btn" data-tab="tab-benchmark">
+                        <i class="fa-solid fa-gauge-high"></i> Fidelity Metrics & Benchmark
+                    </button>
+                </nav>
+
+                <!-- Tab 1: Local Explanations (SHAP & LIME Side-by-Side) -->
+                <div id="tab-local" class="tab-pane active">
+                    <div class="grid-2-col">
+                        <!-- SHAP Waterfall Card -->
+                        <div class="card glass-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3><i class="fa-solid fa-water"></i> SHAP Waterfall Attribution</h3>
+                                    <span class="card-subtitle">Game-Theoretic Coalitional Additive Shapley Values</span>
+                                </div>
+                                <span id="shap-additivity-badge" class="badge success">Additivity Verified</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="shap-waterfall-chart" class="chart-container"></div>
+                                <div class="explanation-note">
+                                    <p><i class="fa-solid fa-circle-info"></i> <strong>Base Value $E[f(X)]$:</strong> <span id="shap-base-val">--</span> | <strong>Final Output $f(x)$:</strong> <span id="shap-final-val">--</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LIME Sparse Linear Surrogate Card -->
+                        <div class="card glass-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3><i class="fa-solid fa-draw-polygon"></i> LIME Local Surrogate</h3>
+                                    <span class="card-subtitle">Sparse Linear Approximation in Perturbed Neighborhood</span>
+                                </div>
+                                <div class="fidelity-indicator">
+                                    <span class="fid-label">Local $R^2$ Fidelity:</span>
+                                    <span id="lime-r2-badge" class="badge info">0.0000</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="lime-bar-chart" class="chart-container"></div>
+                                <div class="explanation-note">
+                                    <p><i class="fa-solid fa-circle-info"></i> <strong>Local Intercept:</strong> <span id="lime-intercept-val">--</span> | <strong>Perturbed Samples:</strong> 500</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Counterfactual Explorer -->
+                <div id="tab-counterfactual" class="tab-pane">
+                    <div class="card glass-card">
+                        <div class="card-header">
+                            <div>
+                                <h3><i class="fa-solid fa-arrows-split-up-and-left"></i> Actionable Counterfactual "What-If" Analysis</h3>
+                                <span class="card-subtitle">Minimal feature changes required to flip decision from High Risk to Low Risk</span>
+                            </div>
+                            <button id="recalc-cf-btn" class="btn btn-secondary btn-sm">
+                                <i class="fa-solid fa-rotate-right"></i> Recalculate
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="cf-summary-bar">
+                                <div class="cf-metric">
+                                    <span class="cf-metric-label">Current Prob</span>
+                                    <span id="cf-orig-prob" class="cf-metric-val text-danger">--</span>
+                                </div>
+                                <div class="cf-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                <div class="cf-metric">
+                                    <span class="cf-metric-label">Counterfactual Target Prob</span>
+                                    <span id="cf-target-prob" class="cf-metric-val text-success">--</span>
+                                </div>
+                                <div class="cf-status">
+                                    <span id="cf-status-badge" class="badge success">Counterfactual Found</span>
+                                </div>
+                            </div>
+
+                            <div class="cf-table-wrapper">
+                                <h4>Recommended Actionable Interventions:</h4>
+                                <table class="custom-table" id="cf-changes-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Feature</th>
+                                            <th>Current Value</th>
+                                            <th>Counterfactual Value</th>
+                                            <th>Required Change</th>
+                                            <th>Actionability</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cf-changes-tbody">
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Global Interpretability & PDP -->
+                <div id="tab-global" class="tab-pane">
+                    <div class="grid-2-col">
+                        <!-- SHAP Global Summary Plot -->
+                        <div class="card glass-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-chart-column"></i> Global Feature Importance (SHAP)</h3>
+                                <span class="card-subtitle">Mean absolute Shapley values across dataset</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="shap-global-bar-chart" class="chart-container"></div>
+                            </div>
+                        </div>
+
+                        <!-- PDP / ICE Interactive Plot -->
+                        <div class="card glass-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3><i class="fa-solid fa-chart-line"></i> Partial Dependence & ICE Curves</h3>
+                                    <span class="card-subtitle">Marginal response curve of target feature</span>
+                                </div>
+                                <select id="pdp-feature-select" class="custom-select custom-select-sm">
+                                    <!-- Loaded dynamically -->
+                                </select>
+                            </div>
+                            <div class="card-body">
+                                <div id="pdp-chart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Fidelity Metrics & Benchmark -->
+                <div id="tab-benchmark" class="tab-pane">
+                    <div class="card glass-card">
+                        <div class="card-header">
+                            <div>
+                                <h3><i class="fa-solid fa-square-poll-vertical"></i> Explanation Method Fidelity & Performance Benchmark</h3>
+                                <span class="card-subtitle">Empirical evaluation of local fidelity, additivity, and latency</span>
+                            </div>
+                            <button id="trigger-eval-btn" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-play"></i> Run Full Benchmark
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="metrics-cards-grid">
+                                <div class="metric-box glass-card">
+                                    <div class="m-icon text-primary"><i class="fa-solid fa-bullseye"></i></div>
+                                    <div class="m-content">
+                                        <span class="m-title">LIME Local R² Fidelity</span>
+                                        <span id="bm-lime-r2" class="m-value">--</span>
+                                        <span class="m-desc">Surrogate fit quality ($R^2 \in [0, 1]$)</span>
+                                    </div>
+                                </div>
+
+                                <div class="metric-box glass-card">
+                                    <div class="m-icon text-success"><i class="fa-solid fa-check-double"></i></div>
+                                    <div class="m-content">
+                                        <span class="m-title">SHAP Additivity Error</span>
+                                        <span id="bm-shap-error" class="m-value">--</span>
+                                        <span class="m-desc">Max deviation $|f(x) - \sum \phi_i|$</span>
+                                    </div>
+                                </div>
+
+                                <div class="metric-box glass-card">
+                                    <div class="m-icon text-warning"><i class="fa-solid fa-stopwatch"></i></div>
+                                    <div class="m-content">
+                                        <span class="m-title">SHAP Avg Latency</span>
+                                        <span id="bm-shap-time" class="m-value">-- ms</span>
+                                        <span class="m-desc">TreeExplainer computation time</span>
+                                    </div>
+                                </div>
+
+                                <div class="metric-box glass-card">
+                                    <div class="m-icon text-info"><i class="fa-solid fa-clock text-info"></i></div>
+                                    <div class="m-content">
+                                        <span class="m-title">LIME Avg Latency</span>
+                                        <span id="bm-lime-time" class="m-value">-- ms</span>
+                                        <span class="m-desc">Perturbation sampling (500 samples)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="divider">
+
+                            <div class="model-eval-table-wrapper">
+                                <h4>Trained Models Performance Comparison:</h4>
+                                <table class="custom-table" id="models-eval-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Model Architecture</th>
+                                            <th>Model Type</th>
+                                            <th>Accuracy</th>
+                                            <th>Precision</th>
+                                            <th>Recall</th>
+                                            <th>F1-Score</th>
+                                            <th>ROC-AUC</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="models-eval-tbody">
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Custom App JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

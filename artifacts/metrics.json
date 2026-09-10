@@ -1,0 +1,70 @@
+{
+  "xgboost": {
+    "accuracy": 0.8833,
+    "precision": 0.9067,
+    "recall": 0.9067,
+    "f1_score": 0.9067,
+    "roc_auc": 0.9674,
+    "confusion_matrix": [
+      [
+        38,
+        7
+      ],
+      [
+        7,
+        68
+      ]
+    ]
+  },
+  "random_forest": {
+    "accuracy": 0.8417,
+    "precision": 0.859,
+    "recall": 0.8933,
+    "f1_score": 0.8758,
+    "roc_auc": 0.9384,
+    "confusion_matrix": [
+      [
+        34,
+        11
+      ],
+      [
+        8,
+        67
+      ]
+    ]
+  },
+  "neural_net": {
+    "accuracy": 0.9,
+    "precision": 0.8987,
+    "recall": 0.9467,
+    "f1_score": 0.9221,
+    "roc_auc": 0.9641,
+    "confusion_matrix": [
+      [
+        37,
+        8
+      ],
+      [
+        4,
+        71
+      ]
+    ]
+  },
+  "logistic_regression": {
+    "accuracy": 0.875,
+    "precision": 0.875,
+    "recall": 0.9333,
+    "f1_score": 0.9032,
+    "roc_auc": 0.9419,
+    "confusion_matrix": [
+      [
+        35,
+        10
+      ],
+      [
+        5,
+        70
+      ]
+    ]
+  }
+}
