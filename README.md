@@ -90,6 +90,29 @@ http://127.0.0.1:5000
 
 ---
 
+## 🚀 Cloud & Production Deployment
+
+The repository is configured for one-click production deployment across cloud providers:
+
+- **Render.com (Free Web Service)**: Connect repository `NehaMusale11/XAI-PROJECT-` to Render. Render automatically builds using `render.yaml` or `Procfile`.
+- **Hugging Face Spaces (Free 16GB RAM)**: Create a Docker space and push the repository.
+- **Docker / Docker Compose**:
+  ```bash
+  docker compose up -d
+  ```
+- **Local WSGI Production Server**:
+  ```bash
+  # Windows:
+  waitress-serve --listen=0.0.0.0:5000 app:app
+
+  # Linux/macOS:
+  gunicorn app:app --workers 1 --threads 4 --timeout 180 --bind 0.0.0.0:5000
+  ```
+
+See [DEPLOYMENT.md](file:///c:/Users/s2003/OneDrive/Desktop/XAI%20TAE/DEPLOYMENT.md) for step-by-step instructions.
+
+---
+
 ## 📊 Empirical Fidelity & Benchmark Results
 
 | Model Architecture | Accuracy | F1-Score | ROC-AUC | Explanation Method | Local Fidelity / Metric |

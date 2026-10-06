@@ -10,3 +10,5 @@ Flask>=3.0.0
 matplotlib>=3.7.0
 seaborn>=0.12.0
 plotly>=5.14.0
+gunicorn>=21.2.0
+waitress>=2.1.2

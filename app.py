@@ -3,6 +3,7 @@ Flask Web Server & REST API for Post-hoc Explanation Dashboard.
 Serves prediction endpoints, SHAP, LIME, PDP, Counterfactuals, and benchmark APIs.
 """
 
+import os
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import numpy as np
@@ -199,6 +200,19 @@ def get_benchmark():
     return jsonify(res)
 
 
+@app.route('/healthz', methods=['GET'])
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for deployment monitoring and load balancers."""
+    return jsonify({
+        'status': 'healthy',
+        'models_loaded': list(models.keys()),
+        'version': '1.0.0'
+    })
+
+
 if __name__ == '__main__':
-    print("[App] Starting Flask Server on http://127.0.0.1:5000 ...")
-    app.run(host='127.0.0.1', port=5000, debug=False)
+    port = int(os.environ.get('PORT', 5000))
+    host = os.environ.get('HOST', '0.0.0.0')
+    print(f"[App] Starting Flask Server on http://{host}:{port} ...", flush=True)
+    app.run(host=host, port=port, debug=False)
